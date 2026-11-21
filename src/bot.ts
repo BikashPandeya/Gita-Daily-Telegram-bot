@@ -5,7 +5,7 @@ import {
   getChapterHighlights,
   getDailyVerse,
   getRandomVerse,
-  nepalDate
+  nepalDate,
 } from "./verses";
 
 const HELP_TEXT = [
@@ -20,13 +20,15 @@ const HELP_TEXT = [
   "/start — Subscribe again",
   "/help — Show this help message",
   "",
-  "Daily messages are scheduled for 7:00 AM Nepal time."
+  "Daily messages are scheduled for 7:00 AM Nepal time.",
 ].join("\n");
 
 async function getLanguage(env: Env, chatId: string): Promise<"en" | "hi"> {
   const row = await env.DB.prepare(
-    "SELECT language FROM subscribers WHERE chat_id = ?"
-  ).bind(chatId).first<{ language: string }>();
+    "SELECT language FROM subscribers WHERE chat_id = ?",
+  )
+    .bind(chatId)
+    .first<{ language: string }>();
 
   return row?.language === "hi" ? "hi" : "en";
 }
@@ -34,14 +36,19 @@ async function getLanguage(env: Env, chatId: string): Promise<"en" | "hi"> {
 function getDailyKrishnaImage(date: string): number {
   const [year, month, day] = date.split("-").map(Number);
 
-  const dayNumber = Math.floor(
-    Date.UTC(year, month - 1, day) / 86_400_000
-  );
+  const dayNumber = Math.floor(Date.UTC(year, month - 1, day) / 86_400_000);
 
   return (dayNumber % 10) + 1;
 }
 
-export async function handleUpdate(env: Env, update: TelegramUpdate): Promise<void> {
+function getRandomKrishnaImage(): number {
+  return Math.floor(Math.random() * 10) + 1;
+}
+
+export async function handleUpdate(
+  env: Env,
+  update: TelegramUpdate,
+): Promise<void> {
   const message = update.message;
   if (!message?.text || !message.chat) return;
 
@@ -51,7 +58,8 @@ export async function handleUpdate(env: Env, update: TelegramUpdate): Promise<vo
   const command = (rawCommand || "").split("@")[0].toLowerCase();
 
   if (command === "/start" || command === "/subscribe") {
-    await env.DB.prepare(`
+    await env.DB.prepare(
+      `
       INSERT INTO subscribers (chat_id, username, first_name, language, active)
       VALUES (?, ?, ?, 'en', 1)
       ON CONFLICT(chat_id) DO UPDATE SET
@@ -59,34 +67,49 @@ export async function handleUpdate(env: Env, update: TelegramUpdate): Promise<vo
         first_name = excluded.first_name,
         active = 1,
         updated_at = CURRENT_TIMESTAMP
-    `).bind(
-      chatId,
-      message.from?.username || null,
-      message.from?.first_name || null
-    ).run();
+    `,
+    )
+      .bind(
+        chatId,
+        message.from?.username || null,
+        message.from?.first_name || null,
+      )
+      .run();
 
-    await sendMessage(env, chatId, [
-      "🙏 <b>Welcome to Gita Daily Wisdom!</b>",
-      "",
-      "You are subscribed to one Bhagavad Gita verse and a practical reflection every day at 7:00 AM Nepal time.",
-      "",
-      "Use /today to read today's verse now.",
-      "Use /language hi to switch to Hindi.",
-      "Use /help to see all commands.",
-      "",
-      "May each day's wisdom bring clarity and peace. 🪷"
-    ].join("\n"));
+    await sendMessage(
+      env,
+      chatId,
+      [
+        "🙏 <b>Welcome to Gita Daily Wisdom!</b>",
+        "",
+        "You are subscribed to one Bhagavad Gita verse and a practical reflection every day at 7:00 AM Nepal time.",
+        "",
+        "Use /today to read today's verse now.",
+        "Use /language hi to switch to Hindi.",
+        "Use /help to see all commands.",
+        "",
+        "May each day's wisdom bring clarity and peace. 🪷",
+      ].join("\n"),
+    );
     return;
   }
 
   if (command === "/stop" || command === "/unsubscribe") {
-    await env.DB.prepare(`
+    await env.DB.prepare(
+      `
       UPDATE subscribers
       SET active = 0, updated_at = CURRENT_TIMESTAMP
       WHERE chat_id = ?
-    `).bind(chatId).run();
+    `,
+    )
+      .bind(chatId)
+      .run();
 
-    await sendMessage(env, chatId, "You have been unsubscribed. Send /start whenever you want to receive daily Gita wisdom again.");
+    await sendMessage(
+      env,
+      chatId,
+      "You have been unsubscribed. Send /start whenever you want to receive daily Gita wisdom again.",
+    );
     return;
   }
 
@@ -98,57 +121,84 @@ export async function handleUpdate(env: Env, update: TelegramUpdate): Promise<vo
   if (command === "/language") {
     const requested = (args[0] || "").toLowerCase();
     if (requested !== "en" && requested !== "hi") {
-      await sendMessage(env, chatId, "Choose a language with /language en or /language hi.");
+      await sendMessage(
+        env,
+        chatId,
+        "Choose a language with /language en or /language hi.",
+      );
       return;
     }
 
     const result = await env.DB.prepare(
-      "UPDATE subscribers SET language = ?, updated_at = CURRENT_TIMESTAMP WHERE chat_id = ?"
-    ).bind(requested, chatId).run();
+      "UPDATE subscribers SET language = ?, updated_at = CURRENT_TIMESTAMP WHERE chat_id = ?",
+    )
+      .bind(requested, chatId)
+      .run();
 
     if (!result.success || result.meta.changes === 0) {
-      await sendMessage(env, chatId, "Send /start first to subscribe, then choose your language.");
+      await sendMessage(
+        env,
+        chatId,
+        "Send /start first to subscribe, then choose your language.",
+      );
       return;
     }
 
-    await sendMessage(env, chatId, requested === "hi"
-      ? "भाषा हिंदी में बदल दी गई है।"
-      : "Language changed to English.");
+    await sendMessage(
+      env,
+      chatId,
+      requested === "hi"
+        ? "भाषा हिंदी में बदल दी गई है।"
+        : "Language changed to English.",
+    );
     return;
   }
 
+  if (command === "/today") {
+    const language = await getLanguage(env, chatId);
+    const date = nepalDate();
 
-if (command === "/today") {
-  const language = await getLanguage(env, chatId);
-  const date = nepalDate();
+    const imageNumber = getDailyKrishnaImage(date);
 
-  const imageNumber = getDailyKrishnaImage(date);
+    const imageUrl = `${env.WORKER_URL.replace(/\/$/, "")}/krishna/krishna-${imageNumber}.jpg`;
 
-  const imageUrl =
-    `${env.WORKER_URL.replace(/\/$/, "")}/krishna/krishna-${imageNumber}.jpg`;
+    await sendPhoto(env, chatId, imageUrl);
 
-  await sendPhoto(env, chatId, imageUrl);
+    await sendMessage(
+      env,
+      chatId,
+      formatVerse(getDailyVerse(date, language), language),
+    );
 
-  await sendMessage(
-    env,
-    chatId,
-    formatVerse(getDailyVerse(date, language), language)
-  );
-
-  return;
-}
-
+    return;
+  }
 
   if (command === "/random") {
     const language = await getLanguage(env, chatId);
-    await sendMessage(env, chatId, formatVerse(getRandomVerse(language), language));
+    const verse = getRandomVerse(language);
+
+    const imageNumber = getRandomKrishnaImage();
+
+    const imageUrl = `${env.WORKER_URL.replace(/\/$/, "")}/krishna/krishna-${imageNumber}.jpg`;
+
+    await sendPhoto(env, chatId, imageUrl);
+
+    await sendMessage(env, chatId, formatVerse(verse, language));
+
     return;
   }
-
   if (command === "/chapter") {
     const chapterNumber = Number(args[0]);
-    if (!Number.isInteger(chapterNumber) || chapterNumber < 1 || chapterNumber > 18) {
-      await sendMessage(env, chatId, "Please provide a chapter number from 1 to 18. Example: /chapter 2");
+    if (
+      !Number.isInteger(chapterNumber) ||
+      chapterNumber < 1 ||
+      chapterNumber > 18
+    ) {
+      await sendMessage(
+        env,
+        chatId,
+        "Please provide a chapter number from 1 to 18. Example: /chapter 2",
+      );
       return;
     }
 
@@ -156,7 +206,11 @@ if (command === "/today") {
     const verses = getChapterHighlights(chapterNumber, language);
 
     if (verses.length === 0) {
-      await sendMessage(env, chatId, `Chapter ${chapterNumber} is not in the current featured-verse list. Try /random or another chapter.`);
+      await sendMessage(
+        env,
+        chatId,
+        `Chapter ${chapterNumber} is not in the current featured-verse list. Try /random or another chapter.`,
+      );
       return;
     }
 
@@ -166,5 +220,9 @@ if (command === "/today") {
     return;
   }
 
-  await sendMessage(env, chatId, "I didn't recognize that command. Send /help to see what I can do.");
+  await sendMessage(
+    env,
+    chatId,
+    "I didn't recognize that command. Send /help to see what I can do.",
+  );
 }
