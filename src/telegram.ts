@@ -20,8 +20,7 @@ export async function telegramRequest(
   if (!response.ok || data.ok === false) {
     return {
       ok: false,
-      description:
-        data.description ?? `Telegram HTTP error ${response.status}`,
+      description: data.description ?? `Telegram HTTP error ${response.status}`,
       error_code: data.error_code ?? response.status
     };
   }
@@ -39,5 +38,16 @@ export async function sendMessage(
     text,
     parse_mode: "HTML",
     disable_web_page_preview: true
+  });
+}
+
+export async function sendPhoto(
+  env: Env,
+  chatId: string | number,
+  photoUrl: string
+): Promise<TelegramApiResult> {
+  return telegramRequest(env, "sendPhoto", {
+    chat_id: chatId,
+    photo: photoUrl
   });
 }

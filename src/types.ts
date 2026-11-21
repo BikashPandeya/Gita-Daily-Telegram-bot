@@ -2,6 +2,7 @@ export interface Env {
   DB: D1Database;
   BOT_TOKEN: string;
   WEBHOOK_SECRET: string;
+  WORKER_URL: string;
 }
 
 export interface TelegramUser {

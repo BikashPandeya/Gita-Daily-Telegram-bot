@@ -5,6 +5,12 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-11-21",
   "workers_dev": true,
+  "assets": {
+  	"directory": "./images"
+  },
+  "vars": {
+  "WORKER_URL": "https://gita-daily-bot.gita-daily-bot.workers.dev"
+  },
   "triggers": {
     "crons": [
       "15 1 * * *"

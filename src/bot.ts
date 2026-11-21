@@ -1,5 +1,5 @@
 import type { Env, TelegramUpdate } from "./types";
-import { sendMessage } from "./telegram";
+import { sendMessage, sendPhoto } from "./telegram";
 import {
   formatVerse,
   getChapterHighlights,
@@ -29,6 +29,16 @@ async function getLanguage(env: Env, chatId: string): Promise<"en" | "hi"> {
   ).bind(chatId).first<{ language: string }>();
 
   return row?.language === "hi" ? "hi" : "en";
+}
+
+function getDailyKrishnaImage(date: string): number {
+  const [year, month, day] = date.split("-").map(Number);
+
+  const dayNumber = Math.floor(
+    Date.UTC(year, month - 1, day) / 86_400_000
+  );
+
+  return (dayNumber % 10) + 1;
 }
 
 export async function handleUpdate(env: Env, update: TelegramUpdate): Promise<void> {
@@ -107,11 +117,27 @@ export async function handleUpdate(env: Env, update: TelegramUpdate): Promise<vo
     return;
   }
 
-  if (command === "/today") {
-    const language = await getLanguage(env, chatId);
-    await sendMessage(env, chatId, formatVerse(getDailyVerse(nepalDate(), language), language));
-    return;
-  }
+
+if (command === "/today") {
+  const language = await getLanguage(env, chatId);
+  const date = nepalDate();
+
+  const imageNumber = getDailyKrishnaImage(date);
+
+  const imageUrl =
+    `${env.WORKER_URL.replace(/\/$/, "")}/krishna/krishna-${imageNumber}.jpg`;
+
+  await sendPhoto(env, chatId, imageUrl);
+
+  await sendMessage(
+    env,
+    chatId,
+    formatVerse(getDailyVerse(date, language), language)
+  );
+
+  return;
+}
+
 
   if (command === "/random") {
     const language = await getLanguage(env, chatId);
