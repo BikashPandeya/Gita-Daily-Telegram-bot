@@ -1,53 +1,71 @@
 # 🙏 Gita Daily Wisdom Bot
 
-A Telegram bot that brings the timeless wisdom of the **Bhagavad Gita** to your daily life.
-
-Receive a Bhagavad Gita verse every morning, explore random verses, switch between English and Hindi, and discover meaningful reflections — all directly through Telegram.
-
-## 🤖 Try the Bot
-
-Experience the wisdom of the Bhagavad Gita directly on Telegram.
+A Telegram bot that shares daily wisdom from the **Bhagavad Gita**, with Sanskrit verses, translations, and reflections in English and Hindi — accompanied by beautiful images of Lord Krishna.
 
 **[Start Bhagavat Gita Daily Wisdom](https://t.me/GitaDailyWisdomBot)**
+**Try the bot:** [@GitaDailyWisdomBot](https://t.me/GitaDailyWisdomBot)
 
-Telegram: [@GitaDailyWisdomBot](https://t.me/GitaDailyWisdomBot)
-
-Built with **TypeScript, Cloudflare Workers, Cloudflare D1, and the Telegram Bot API**.
+---
 
 ## ✨ Features
 
-- 📖 **Daily Bhagavad Gita Verse** – Receive a selected verse every morning at 7:00 AM Nepal time.
-- 🌍 **Bilingual Support** – Read verses in English or Hindi.
-- 🎲 **Random Verse** – Discover a randomly selected featured verse.
-- 📚 **Chapter Highlights** – Explore selected verses from a specific chapter.
-- 💭 **Daily Reflections** – Read reflections accompanying selected verses.
-- 🔔 **Subscription Management** – Subscribe or unsubscribe whenever you want.
-- ⚡ **Automated Delivery** – Cloudflare Cron Triggers handle scheduled messages.
-- 💾 **Delivery Tracking** – Cloudflare D1 tracks daily message delivery and errors.
+- 📖 **Daily Bhagavad Gita Upadesh** — Receive a verse and reflection every morning at 7:00 AM Nepal Time.
+- 🦚 **Daily Krishna Images** — Every daily upadesh comes with a Krishna image, rotating through a collection of 10 images.
+- 🎲 **Random Wisdom** — Get a random Bhagavad Gita verse with a randomly selected Krishna image.
+- 🌐 **Bilingual Support** — Read wisdom in English or Hindi.
+- 📚 **Chapter Highlights** — Explore selected verses from individual chapters.
+- 🔔 **Subscription Management** — Subscribe or unsubscribe whenever you want.
+- ☁️ **Serverless Architecture** — Runs on Cloudflare Workers with Cloudflare D1 for data storage.
+- ⏰ **Automated Delivery** — Scheduled daily messages without requiring a continuously running server.
 
 ## 🤖 Bot Commands
 
 | Command | Description |
 |---|---|
-| `/start` | Start the bot and subscribe to daily verses |
-| `/subscribe` | Subscribe to daily messages |
-| `/stop` | Stop receiving daily messages |
-| `/unsubscribe` | Unsubscribe from daily messages |
-| `/today` | Get today's Bhagavad Gita verse |
-| `/random` | Receive a random featured verse |
-| `/chapter <number>` | Explore selected verses from a chapter |
+| `/start` | Start the bot and subscribe to daily wisdom |
+| `/today` | Get today's Bhagavad Gita verse with Krishna's image |
+| `/random` | Receive a random verse with a random Krishna image |
+| `/chapter 1` | Explore selected verses from a chapter |
 | `/language en` | Switch to English |
 | `/language hi` | Switch to Hindi |
-| `/help` | Display available commands |
+| `/stop` | Stop receiving daily messages |
+| `/help` | View available commands |
+
+## 🖼️ Krishna Image Collection
+
+The bot uses a collection of 10 locally hosted Krishna images.
+
+```text
+images/
+└── krishna/
+    ├── krishna-1.jpg
+    ├── krishna-2.jpg
+    ├── krishna-3.jpg
+    ├── krishna-4.jpg
+    ├── krishna-5.jpg
+    ├── krishna-6.jpg
+    ├── krishna-7.jpg
+    ├── krishna-8.jpg
+    ├── krishna-9.jpg
+    └── krishna-10.jpg
+```
+
+### Image selection
+
+- **Daily upadesh:** One image is selected for each Nepal calendar date. All subscribers receive the same image for that date.
+- **`/today`:** Uses the same image as that day's scheduled upadesh.
+- **`/random`:** Selects a random Krishna image each time the command is used.
+
+Images are served through Cloudflare Workers static assets and sent through the Telegram Bot API.
 
 ## 🛠️ Tech Stack
 
 - **Language:** TypeScript
 - **Runtime:** Cloudflare Workers
-- **Database:** Cloudflare D1 (SQLite)
+- **Database:** Cloudflare D1
 - **Bot Platform:** Telegram Bot API
-- **Scheduling:** Cloudflare Cron Triggers
-- **Package Manager:** npm
+- **Deployment:** Wrangler CLI
+- **Data:** Bhagavad Gita verse and translation JSON datasets
 
 ## 📁 Project Structure
 
@@ -58,6 +76,12 @@ gita-daily-bot/
 │   ├── base.json
 │   ├── en.json
 │   └── hi.json
+│
+├── images/
+│   └── krishna/
+│       ├── krishna-1.jpg
+│       ├── krishna-2.jpg
+│       └── ... krishna-10.jpg
 │
 ├── migrations/
 │   └── 0001_initial.sql
@@ -82,20 +106,10 @@ gita-daily-bot/
 
 ## 🚀 Getting Started
 
-### Prerequisites
-
-Before starting, make sure you have:
-
-- Node.js installed
-- npm installed
-- A Cloudflare account
-- A Telegram account
-- A Telegram bot token from [@BotFather](https://t.me/BotFather)
-
 ### 1. Clone the repository
 
 ```bash
-git clone <YOUR_REPOSITORY_URL>
+git clone https://github.com/YOUR_USERNAME/gita-daily-bot.git
 cd gita-daily-bot
 ```
 
@@ -111,97 +125,102 @@ npm install
 npm run data:download
 ```
 
-This downloads the verse data and translations into the `data/` directory.
-
 ### 4. Configure Cloudflare
 
-Log in to Cloudflare:
+Make sure you have a Cloudflare account and Wrangler installed through the project dependencies.
+
+Log in:
 
 ```bash
 npx wrangler login
 ```
 
-Create the D1 database:
+Create your D1 database:
 
 ```bash
-npm run db:create
+npx wrangler d1 create gita-daily-db
 ```
 
-Update the database ID in `wrangler.jsonc` using the ID returned by Cloudflare.
+Update `wrangler.jsonc` with the database ID returned by Cloudflare.
 
-Apply the database migrations:
+Apply migrations:
 
 ```bash
 npm run db:migrate:remote
 ```
 
-### 5. Configure secrets
+### 5. Configure environment variables
 
-Add your Telegram bot token:
+Add your Telegram bot token and webhook secret as Cloudflare secrets:
 
 ```bash
 npx wrangler secret put BOT_TOKEN
-```
-
-Add a secure webhook secret:
-
-```bash
 npx wrangler secret put WEBHOOK_SECRET
 ```
 
-Generate a webhook secret with:
+Set the public Worker URL in `wrangler.jsonc`:
 
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```json
+"vars": {
+  "WORKER_URL": "https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev"
+}
 ```
 
-Keep both values private. Never commit secrets to GitHub.
+Configure static assets so Cloudflare can serve the Krishna images:
 
-### 6. Deploy to Cloudflare Workers
-
-```bash
-npm run deploy
+```json
+"assets": {
+  "directory": "./images"
+}
 ```
 
-After deployment, Cloudflare provides a Worker URL:
+Keep the existing D1 database and cron configuration in the same file.
 
-```text
-https://gita-daily-bot.<your-subdomain>.workers.dev
-```
+### 6. Configure the Telegram webhook
 
-### 7. Configure the Telegram webhook
+Set the following environment variables in your local terminal before running the webhook setup script:
 
-Set the required environment variables in PowerShell:
+- `BOT_TOKEN`
+- `WEBHOOK_SECRET`
+- `WORKER_URL`
 
-```powershell
-$env:BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
-$env:WEBHOOK_SECRET = "YOUR_WEBHOOK_SECRET"
-$env:WORKER_URL = "https://gita-daily-bot.<your-subdomain>.workers.dev"
-```
-
-Register the webhook:
+Then run:
 
 ```bash
 npm run webhook:set
 ```
 
-After successful registration, Telegram will forward incoming bot updates to your Cloudflare Worker.
+The script registers the Telegram webhook with your Cloudflare Worker.
 
-Remove the temporary PowerShell environment variables afterward:
-
-```powershell
-Remove-Item Env:BOT_TOKEN
-Remove-Item Env:WEBHOOK_SECRET
-Remove-Item Env:WORKER_URL
-```
-
-## 💻 Local Development
-
-Apply migrations to your local D1 database:
+### 7. Deploy
 
 ```bash
-npm run db:migrate:local
+npm run typecheck
+npm run deploy
 ```
+
+Your bot is now deployed!
+
+## ⏰ Daily Scheduling
+
+The bot uses Cloudflare Cron Triggers to automatically send daily upadesh messages.
+
+Configured schedule:
+
+```json
+"triggers": {
+  "crons": ["15 1 * * *"]
+}
+```
+
+This corresponds to:
+
+- **UTC:** 01:15 AM
+- **Nepal Time:** 07:00 AM
+
+The scheduler checks active subscribers, selects the daily verse and Krishna image, and records delivery status in D1 to avoid duplicate daily deliveries.
+
+## 🧪 Local Development
 
 Start the local development server:
 
@@ -209,99 +228,36 @@ Start the local development server:
 npm run dev
 ```
 
-Your local Worker will be available at:
-
-```text
-http://127.0.0.1:8787
-```
-
-Check the health endpoint:
-
-```text
-http://127.0.0.1:8787/health
-```
-
-To manually trigger the scheduled event during local development:
+Run TypeScript checks:
 
 ```bash
-curl "http://127.0.0.1:8787/cdn-cgi/local/scheduled"
+npm run typecheck
 ```
 
-**Note:** Local scheduled events use your local D1 database. Telegram webhook testing requires a publicly reachable endpoint.
+Deploy to Cloudflare:
 
-## ⏰ Daily Schedule
-
-The bot uses a Cloudflare Cron Trigger:
-
-```text
-15 1 * * *
+```bash
+npm run deploy
 ```
 
-This runs daily at:
+## 🔐 Security
 
-**7:00 AM Nepal Standard Time (NPT, UTC+5:45).**
+- Telegram bot tokens and webhook secrets are stored as Cloudflare secrets.
+- Webhook requests are validated using Telegram's secret token header.
+- Subscriber preferences and delivery records are stored in Cloudflare D1.
+- Never commit bot tokens, webhook secrets, or other private credentials to GitHub.
 
-The scheduler retrieves active subscribers, selects the daily verse, sends the message, and records the delivery status in D1.
+## 🙌 Acknowledgements
 
-## 🔐 Environment Variables
-
-| Variable | Description |
-|---|---|
-| `BOT_TOKEN` | Telegram bot API token |
-| `WEBHOOK_SECRET` | Secret used to verify Telegram webhook requests |
-| `WORKER_URL` | Public Cloudflare Worker URL used by the webhook registration script |
-| `DB` | Cloudflare D1 database binding |
-
-`BOT_TOKEN` and `WEBHOOK_SECRET` are configured as Cloudflare Worker secrets. `WORKER_URL` is used by the local webhook setup script.
-
-## 🧪 Available Scripts
-
-| Command | Purpose |
-|---|---|
-| `npm run dev` | Start local development server |
-| `npm run deploy` | Deploy the Cloudflare Worker |
-| `npm run typecheck` | Run TypeScript checks |
-| `npm run data:download` | Download verse data |
-| `npm run db:create` | Create the D1 database |
-| `npm run db:migrate:local` | Apply local database migrations |
-| `npm run db:migrate:remote` | Apply remote database migrations |
-| `npm run webhook:set` | Register the Telegram webhook |
-
-## 📚 Data
-
-The project uses JSON-based Bhagavad Gita verse data, including Sanskrit verses and English and Hindi translations.
-
-Data download source:
-
-[AdiyogiArts – Gita JSON](https://github.com/AdiyogiArts/gita-json)
-
-Please review the upstream repository's licensing and attribution requirements before redistributing the downloaded data.
-
-## 🔮 Future Improvements
-
-Potential additions to the project:
-
-- User-selected daily delivery times
-- More translations and languages
-- Verse search by keyword or topic
-- Bookmarks and saved verses
-- Daily streaks and reading progress
-- Interactive chapter exploration
-- More detailed verse explanations
-
-## 🤝 Contributing
-
-Contributions, suggestions, and improvements are welcome.
-
-1. Fork the repository.
-2. Create a new branch.
-3. Make your changes.
-4. Submit a pull request.
-
-## 📜 License
-
-Add a project license after confirming the licensing terms of the source verse data and translations. Do not assume the upstream data is covered by the same license as your code.
+- [Bhagavad Gita JSON Dataset](https://github.com/AdiyogiArts/gita-json)
+- [Telegram Bot API](https://core.telegram.org/bots/api)
+- [Cloudflare Workers](https://developers.cloudflare.com/workers/)
+- [Cloudflare D1](https://developers.cloudflare.com/d1/)
 
 ---
 
-**Built to make the timeless wisdom of the Bhagavad Gita accessible, one verse at a time.** 🙏
+Made with devotion and code. 🙏
+
+**Explore the Bhagavad Gita, one verse at a time.**
+
+[Start using Gita Daily Wisdom Bot](https://t.me/GitaDailyWisdomBot)
