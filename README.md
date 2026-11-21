@@ -8,7 +8,7 @@ Receive a Bhagavad Gita verse every morning, explore random verses, switch betwe
 
 Experience the wisdom of the Bhagavad Gita directly on Telegram.
 
-**[Start Gita Daily Wisdom Bot](https://t.me/GitaDailyWisdomBot)**
+**[Start Bhagavat Gita Daily Wisdom](https://t.me/GitaDailyWisdomBot)**
 
 Telegram: [@GitaDailyWisdomBot](https://t.me/GitaDailyWisdomBot)
 
