@@ -1,3 +1,4 @@
+
 import type { Env, TelegramApiResult } from "./types";
 
 export async function telegramRequest(
@@ -15,13 +16,16 @@ export async function telegramRequest(
   );
 
   const data = (await response.json()) as TelegramApiResult;
-  if (!response.ok && data.ok !== false) {
+
+  if (!response.ok || data.ok === false) {
     return {
       ok: false,
-      description: `Telegram HTTP error ${response.status}`,
-      error_code: response.status
+      description:
+        data.description ?? `Telegram HTTP error ${response.status}`,
+      error_code: data.error_code ?? response.status
     };
   }
+
   return data;
 }
 

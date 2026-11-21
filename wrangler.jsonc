@@ -1,26 +1,21 @@
+
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "gita-daily-bot",
-	"main": "src/index.ts",
-	"compatibility_date": "2026-11-21",
-	"workers_dev": true,
-	"triggers": {
-		"crons": [
-			"15 1 * * *"
-		]
-	},
-	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "gita-daily-db",
-			"database_id": "16f746de-0db8-465f-9d9b-11bbb2e00739",
-			"migrations_dir": "migrations"
-		},
-		{
-			"binding": "gita_daily_db",
-			"database_name": "gita-daily-db",
-			"database_id": "16f746de-0db8-465f-9d9b-11bbb2e00739",
-			"remote": true
-		}
-	]
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gita-daily-bot",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-21",
+  "workers_dev": true,
+  "triggers": {
+    "crons": [
+      "15 1 * * *"
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "gita-daily-db",
+      "database_id": "16f746de-0db8-465f-9d9b-11bbb2e00739",
+      "migrations_dir": "migrations"
+    }
+  ]
 }
