@@ -39,6 +39,7 @@ const HELP_TEXT = [
   "/help — Show this help message",
   "",
   "You can choose your own timezone and delivery times.",
+  "Use /settings to view or change your delivery times and timezone.",
 ].join("\n");
 
 async function getLanguage(

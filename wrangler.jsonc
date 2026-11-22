@@ -1,4 +1,3 @@
-
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "gita-daily-bot",
@@ -6,22 +5,20 @@
   "compatibility_date": "2026-11-21",
   "workers_dev": true,
   "assets": {
-  	"directory": "./images"
+    "directory": "./images",
   },
   "vars": {
-  "WORKER_URL": "https://gita-daily-bot.gita-daily-bot.workers.dev"
+    "WORKER_URL": "https://gita-daily-bot.gita-daily-bot.workers.dev",
   },
   "triggers": {
-    "crons": [
-      "15 1 * * *"
-    ]
+    "crons": ["* * * * *"],
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "gita-daily-db",
       "database_id": "16f746de-0db8-465f-9d9b-11bbb2e00739",
-      "migrations_dir": "migrations"
-    }
-  ]
+      "migrations_dir": "migrations",
+    },
+  ],
 }
